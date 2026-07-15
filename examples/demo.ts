@@ -1,5 +1,5 @@
 /**
- * Demo: an email-assistant agent with guardpost enforcing its permissions.
+ * Demo: an email-assistant agent with reins enforcing its permissions.
  * Run with: npm run demo
  */
 import { allow, createGuard, deny, DeniedError, type AuditEvent } from '../src/index.js';
@@ -35,7 +35,7 @@ const guard = createGuard({
   },
 });
 
-// --- Agent makes tool calls, guardpost decides ----------------------------
+// --- Agent makes tool calls, reins decides ----------------------------
 console.log('\n1. Reading the calendar (allowed):');
 const events = await guard.execute('calendar.read', undefined, calendarApi.listEvents);
 console.log(`  -> ${events.join(', ')}`);

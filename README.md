@@ -1,19 +1,19 @@
-# guardpost
+# reins
 
 **Permissions and audit logging for AI agents.**
 
-Your agent has your user's credentials. Technically it can do *anything* the user can — delete emails, spend money, leak data. guardpost is the layer that says what it's *actually allowed* to do, and records everything it does.
+Your agent has your user's credentials. Technically it can do *anything* the user can — delete emails, spend money, leak data. reins is the layer that says what it's *actually allowed* to do, and records everything it does.
 
 Not a scanner. Not a proxy. A tiny, zero-dependency library that lives inside your agent's code.
 
 ```bash
-npm install guardpost
+npm install reins
 ```
 
 ## Quickstart
 
 ```ts
-import { createGuard, allow, deny } from 'guardpost';
+import { createGuard, allow, deny } from 'reins';
 
 const guard = createGuard({
   agent: 'email-assistant',
@@ -37,7 +37,7 @@ const events = await guard.execute('calendar.read', undefined, () =>
 const createEvent = guard.protect('calendar.create', calendarApi.createEvent);
 ```
 
-If a call violates policy, guardpost throws a `DeniedError` — the tool never runs. Every call, allowed or not, produces one audit event:
+If a call violates policy, reins throws a `DeniedError` — the tool never runs. Every call, allowed or not, produces one audit event:
 
 ```json
 {
@@ -66,7 +66,7 @@ Agent frameworks give you tools. Nothing standard answers:
 - How do I stop it from doing everything else?
 - What exactly did it do last Tuesday?
 
-Every team deploying agents rebuilds this by hand. guardpost is that layer, done once, done right.
+Every team deploying agents rebuilds this by hand. reins is that layer, done once, done right.
 
 ## Roadmap
 

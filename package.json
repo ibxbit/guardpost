@@ -1,7 +1,7 @@
 {
-  "name": "guardpost",
+  "name": "reins",
   "version": "0.0.1",
-  "description": "Permissions and audit logging for AI agents. Declare what your agent is allowed to do — guardpost enforces it and logs everything.",
+  "description": "Permissions and audit logging for AI agents. Declare what your agent is allowed to do — reins enforces it and logs everything.",
   "keywords": [
     "ai",
     "agents",
@@ -16,11 +16,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ibxbit/guardpost.git"
+    "url": "git+https://github.com/ibxbit/reins.git"
   },
-  "homepage": "https://github.com/ibxbit/guardpost#readme",
+  "homepage": "https://github.com/ibxbit/reins#readme",
   "bugs": {
-    "url": "https://github.com/ibxbit/guardpost/issues"
+    "url": "https://github.com/ibxbit/reins/issues"
   },
   "type": "module",
   "main": "./dist/index.js",

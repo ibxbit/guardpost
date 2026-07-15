@@ -4,7 +4,7 @@ export class DeniedError extends Error {
   readonly reason: string;
 
   constructor(agent: string, action: string, reason: string) {
-    super(`guardpost denied "${action}" for agent "${agent}": ${reason}`);
+    super(`reins denied "${action}" for agent "${agent}": ${reason}`);
     this.name = 'DeniedError';
     this.action = action;
     this.reason = reason;
