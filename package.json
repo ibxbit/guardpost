@@ -1,6 +1,6 @@
 {
   "name": "reins",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Permissions and audit logging for AI agents. Declare what your agent is allowed to do — reins enforces it and logs everything.",
   "keywords": [
     "ai",

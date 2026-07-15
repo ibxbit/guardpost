@@ -1,7 +1,9 @@
-import type { Effect, Rule } from './types.js';
+import type { Effect, RateLimit, Rule } from './types.js';
 
 export interface RuleOptions {
   when?: (input: unknown) => boolean;
+  approval?: boolean;
+  limit?: RateLimit;
   reason?: string;
 }
 

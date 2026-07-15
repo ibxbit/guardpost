@@ -1,4 +1,5 @@
 import { DeniedError } from './errors.js';
+import { createLimiter } from './limits.js';
 import { defaultResult, evaluate } from './policy.js';
 import type { AuditEvent, CheckResult, GuardConfig } from './types.js';
 
@@ -6,8 +7,9 @@ export interface Guard {
   /** Check an action against the policies without executing anything. */
   check(action: string, input?: unknown): CheckResult;
   /**
-   * Enforce the policies around a tool call: checks the action, runs `fn`
-   * if allowed, throws `DeniedError` if not. Every call is audited.
+   * Enforce the policies around a tool call: checks the action (including
+   * rate limits and human approval), runs `fn` if allowed, throws
+   * `DeniedError` if not. Every call is audited.
    */
   execute<T>(action: string, input: unknown, fn: () => T | Promise<T>): Promise<T>;
   /** Wrap a tool function so every call goes through `execute`. */
@@ -21,7 +23,9 @@ export function createGuard(config: GuardConfig): Guard {
     defaultEffect = 'deny',
     audit = () => {},
     logInput = true,
+    onApproval,
   } = config;
+  const limiter = createLimiter();
 
   function emit(event: Omit<AuditEvent, 'timestamp' | 'agent'>): void {
     audit({
@@ -35,11 +39,23 @@ export function createGuard(config: GuardConfig): Guard {
   function check(action: string, input?: unknown): CheckResult {
     const rule = evaluate(policies, action, input);
     if (rule === undefined) return defaultResult(defaultEffect);
+    if (rule.effect === 'allow' && limiter.wouldExceed(rule)) {
+      return {
+        decision: 'deny',
+        rule,
+        reason: `rate limit exceeded (max ${rule.limit!.max} per ${rule.limit!.per})`,
+      };
+    }
     return {
       decision: rule.effect,
       rule,
       reason: rule.reason ?? `matched rule "${rule.action}" (${rule.effect})`,
     };
+  }
+
+  function denied(action: string, input: unknown, reason: string): DeniedError {
+    emit({ action, decision: 'denied', reason, input });
+    return new DeniedError(agent, action, reason);
   }
 
   async function execute<T>(
@@ -50,9 +66,19 @@ export function createGuard(config: GuardConfig): Guard {
     const result = check(action, input);
 
     if (result.decision === 'deny') {
-      emit({ action, decision: 'denied', reason: result.reason, input });
-      throw new DeniedError(agent, action, result.reason);
+      throw denied(action, input, result.reason);
     }
+
+    if (result.rule?.approval) {
+      if (onApproval === undefined) {
+        throw denied(action, input, 'approval required but no onApproval handler is configured');
+      }
+      if (!(await onApproval({ agent, action, input, reason: result.reason }))) {
+        throw denied(action, input, 'approval rejected by human');
+      }
+    }
+
+    if (result.rule !== undefined) limiter.consume(result.rule);
 
     const started = performance.now();
     try {
